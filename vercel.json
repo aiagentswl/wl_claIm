@@ -1,5 +1,15 @@
 {
   "rewrites": [
-    { "source": "/share/:username", "destination": "/api/share?u=:username" }
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(Twitterbot|facebookexternalhit|Slackbot|Discordbot|WhatsApp|TelegramBot|LinkedInBot|Embedly|redditbot|SkypeUriPreview|Pinterest).*"
+        }
+      ],
+      "destination": "/api/index"
+    }
   ]
 }
