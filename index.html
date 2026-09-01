@@ -344,6 +344,32 @@
       gap: 0.85rem;
     }
 
+    .referrer-banner {
+      display: none;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(0, 255, 163, 0.08);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-main);
+    }
+
+    .referrer-banner.show {
+      display: flex;
+    }
+
+    .referrer-banner i {
+      color: var(--accent-green);
+    }
+
+    .referrer-banner strong {
+      color: var(--accent-green);
+      font-family: var(--font-mono);
+    }
+
     .badge-status {
       display: inline-flex;
       align-items: center;
@@ -1162,6 +1188,10 @@
 
       <!-- STEP 1: IDENTITY -->
       <div id="step-1" class="flow-card">
+        <div id="referrer-banner" class="referrer-banner">
+          <i class="fa-solid fa-user-plus"></i>
+          <span>Invited by <strong id="referrer-name"></strong> — join the allowlist below to support them.</span>
+        </div>
         <div class="card-header">
           <h2><i class="fa-brands fa-x-twitter"></i> Verify Your Identity</h2>
           <p>Start your allowlist registration by entering your X username. We'll use it to associate your social verification and allowlist entry.</p>
@@ -1606,6 +1636,11 @@
       const refParam = urlParams.get("ref");
       if (refParam) {
         state.referrer = refParam.replace("@", "").trim();
+
+        if (state.referrer) {
+          document.getElementById("referrer-name").textContent = `@${state.referrer}`;
+          document.getElementById("referrer-banner").classList.add("show");
+        }
       }
     });
 
@@ -1856,13 +1891,13 @@
     }
 
     function shareOnX() {
-      // /share/:username is a small server route (see /api/share.js) that returns
-      // OG tags personalized with the username + entry number, then redirects real
-      // visitors on to the referral link. This is what makes the tweet unfurl with
-      // a personalized preview instead of the plain homepage card.
-      const shareLink = `${DOMAIN_URL}share/${encodeURIComponent(state.username)}?e=${encodeURIComponent(state.entryNumber || '')}`;
+      // Same link the "copy referral link" box generates — one consistent
+      // link everywhere. Crawlers requesting this URL (X, Discord, Slack,
+      // etc.) get personalized OG tags server-side (see /api/index.js),
+      // real visitors get the normal site with the referrer banner shown.
+      const shareLink = `${DOMAIN_URL}?ref=${encodeURIComponent(state.username)}`;
       const text = encodeURIComponent(
-        `Just secured my ${PROJECT_NAME} early access allowlist entry (#${state.entryNumber})! 🔥\n\nJoin the allowlist:`
+        `Just secured my ${PROJECT_NAME} early access allowlist entry (#${state.entryNumber})! 🔥\n\nJoin using my invite @${state.username}:`
       );
       const url = `https://x.com/intent/tweet?text=${text}&url=${encodeURIComponent(shareLink)}`;
       window.open(url, "_blank");
